@@ -2,7 +2,7 @@
 
 ## 1. Introducción
 
-Docker es una aplicación donde podemos ejecutar una función, un proceso, crear aplicaciones dentro de lo que denominamos los contenedorees.
+Docker es una aplicación donde podemos ejecutar una función, un proceso, crear aplicaciones dentro de lo que denominamos los contenedores.
 El contenedor es un entorno asilado qie mo permite ejecutar nuestro software con las dependencias que hayamos establecido.
 
 Los contenedores son:
