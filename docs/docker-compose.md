@@ -79,6 +79,6 @@ docker compose logs kafka
 
 ## Conclusión
 
-Docker Compose es esencial para tu TFG porque necesitas levantar varios servicios a la vez:  
+Docker Compose va a ser ensencial para el  TFG porque necesitas levantar varios servicios a la vez:  
 **Kafka, Zookeeper, Spark, Jitsi, Jibri…**  
-Con Compose los defines una sola vez y los ejecutas con un único comando.
+Con Compose los defines una sola vez y se ejecutarán en único comando.
