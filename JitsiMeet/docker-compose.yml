@@ -1,0 +1,102 @@
+services:
+  web:
+    image: jitsi/web:stable
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "8443:443"
+    volumes:
+      - "/home/ortis/.jitsi-meet-cfg/web:/config:Z"
+      - "/home/ortis/.jitsi-meet-cfg/web/letsencrypt:/etc/letsencrypt:Z"
+    environment:
+      - TZ=Europe/Madrid
+      - PUBLIC_URL=https://192.168.1.131:8443
+      - ENABLE_AUTH=0
+      - ENABLE_GUESTS=0
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - XMPP_GUEST_DOMAIN=guest.meet.jitsi
+      - XMPP_BOSH_URL_BASE=http://prosody:5280
+      - XMPP_WEB_SOCKET_DOMAIN=meet.jitsi
+      - XMPP_WEB_SOCKET_URL=wss://meet.jitsi/xmpp-websocket
+      - ENABLE_TURN_SERVER=1
+      - TURN_CREDENTIALS=static
+      - TURN_HOST=192.168.1.131
+      - TURN_PORT=3478
+      - TURN_SECRET=turnsecret
+    depends_on:
+      - prosody
+      - coturn
+
+  prosody:
+    image: jitsi/prosody:stable
+    restart: unless-stopped
+    volumes:
+      - "/home/ortis/.jitsi-meet-cfg/prosody:/config:Z"
+    environment:
+      - TZ=Europe/Madrid
+      - ENABLE_AUTH=0
+      - ENABLE_GUESTS=0
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - XMPP_GUEST_DOMAIN=guest.meet.jitsi
+      - JICOFO_AUTH_USER=focus
+      - JICOFO_AUTH_PASSWORD=focuspass
+      - JVB_AUTH_USER=jvb
+      - JVB_AUTH_PASSWORD=jvbpass
+
+  jicofo:
+    image: jitsi/jicofo:stable
+    restart: unless-stopped
+    volumes:
+      - "/home/ortis/.jitsi-meet-cfg/jicofo:/config:Z"
+    environment:
+      - TZ=Europe/Madrid
+      - XMPP_DOMAIN=meet.jitsi
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - JICOFO_AUTH_USER=focus
+      - JICOFO_AUTH_PASSWORD=focuspass
+    depends_on:
+      - prosody
+
+  jvb:
+    image: jitsi/jvb:stable
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - "/home/ortis/.jitsi-meet-cfg/jvb:/config:Z"
+    environment:
+      - TZ=Europe/Madrid
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
+      - JVB_AUTH_USER=jvb
+      - JVB_AUTH_PASSWORD=jvbpass
+      - JVB_ADVERTISE_IPS=192.168.1.131
+      - JVB_UDP_HARVESTER_DISABLED=false
+      - JVB_TCP_HARVESTER_DISABLED=true
+      - JVB_STUN_SERVERS=
+    depends_on:
+      - prosody
+
+  coturn:
+    image: coturn/coturn:latest
+    restart: unless-stopped
+    network_mode: host
+    command: >
+      turnserver
+      --no-cli
+      --no-tls
+      --no-dtls
+      --no-tcp-relay
+      --min-port=49160
+      --max-port=49200
+      --realm=turn.local
+      --use-auth-secret
+      --static-auth-secret=turnsecret
+      --listening-ip=0.0.0.0
+      --external-ip=192.168.1.131
