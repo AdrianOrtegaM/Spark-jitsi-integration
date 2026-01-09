@@ -1,103 +1,134 @@
-Apache Spark – Despliegue con Docker Compose
+# Apache Spark – Procesamiento de datos con Docker
 
-Este repositorio contiene la configuración y documentación para el despliegue de un
-clúster Apache Spark en modo standalone utilizando Docker Compose.
-El entorno está orientado a la ejecución de jobs distribuidos y al procesamiento
-de datos.
+## 1. Introducción
 
+Apache Spark es un motor de procesamiento distribuido diseñado para el análisis y transformación de grandes volúmenes de datos de forma eficiente.
 
-OBJETIVO DEL PROYECTO
+En este proyecto se utiliza Apache Spark como sistema de procesamiento de datos, desplegado en modo standalone mediante Docker Compose. El objetivo es ejecutar jobs distribuidos y validar el procesamiento de datos reales dentro de un entorno controlado y reproducible.
 
-El objetivo principal de este proyecto es:
+---
 
-- Desplegar Apache Spark de forma reproducible mediante contenedores
-- Validar el funcionamiento de un clúster distribuido (Master + Worker)
-- Procesar datos reales y almacenar los resultados
-- Comprender los problemas reales de integración, dependencias y persistencia de datos
+## 2. Arquitectura del sistema
 
+El sistema se compone de los siguientes elementos:
 
-ARQUITECTURA DEL SISTEMA
-
-El sistema se basa en una arquitectura de:
-
-- Spark Master
-  - Gestiona el clúster
-  - Asigna tareas a los workers
+- **Spark Master**
+  - Coordina el clúster
+  - Asigna recursos a los workers
   - Proporciona una interfaz web de monitorización
 
-- Spark Worker
+- **Spark Worker**
   - Ejecuta las tareas distribuidas
   - Consume los recursos asignados por el Master
 
-- Red Docker dedicada
+- **Red Docker dedicada**
   - Permite la comunicación interna entre los servicios
 
-- Volúmenes compartidos
-  - Permiten persistir datos de entrada y salida fuera de los contenedores
+- **Volúmenes compartidos**
+  - Permiten persistir los datos de entrada y salida fuera de los contenedores
 
-Esta arquitectura permite escalar el sistema fácilmente añadiendo más workers
-en el futuro.
+Esta arquitectura permite escalar el sistema fácilmente añadiendo nuevos workers.
 
+---
 
-PERSISTENCIA DE DATOS
--Ejemplo de uso-
-Se utiliza un volumen compartido para trabajar con datos reales:
+## 3. Despliegue con Docker Compose
 
-- Datos de entrada: imágenes originales
-- Datos de salida: imágenes procesadas
+El despliegue de Apache Spark se realiza mediante Docker Compose, utilizando una arquitectura standalone con un nodo master y un worker.
 
-Esto permite:
-- Mantener los resultados aunque los contenedores se reinicien
-- Verificar visualmente que Spark ha procesado correctamente los datos
-- Separar claramente infraestructura y datos
+Los contenedores se ejecutan de forma aislada y se comunican a través de una red bridge definida específicamente para el clúster.
 
+---
 
-VALIDACIÓN DEL FUNCIONAMIENTO
+## 4. Estructura del proyecto
 
-El correcto funcionamiento del clúster se comprobó mediante:
+```
+spark/
+├── docker-compose.yml
+├── images/
+│   ├── input/
+│   │   └── animal.jpeg
+│   └── output/
+│       └── animal_gray.jpeg
+```
 
-- Acceso a la interfaz web del Spark Master
-- Visualización de workers activos
-- Ejecución de aplicaciones distribuidas
+- `images/input/` contiene los datos de entrada
+- `images/output/` almacena los resultados generados por Spark
+
+---
+
+## 5. Puesta en marcha
+
+Arranque del clúster:
+
+```
+docker compose up -d
+```
+
+Comprobación del estado de los contenedores:
+
+```
+docker ps
+```
+
+Acceso a la interfaz web del Spark Master:
+
+```
+http://localhost:9090
+```
+
+---
+
+## 6. Validación del funcionamiento
+
+El correcto funcionamiento del clúster se validó mediante:
+
+- Visualización del worker activo en la interfaz web
+- Ejecución de aplicaciones distribuidas mediante `spark-submit`
 - Monitorización de aplicaciones en estado RUNNING y COMPLETED
-- Procesamiento de datos reales con generación de resultados persistentes
+- Consumo de recursos por parte del worker durante la ejecución de jobs
 
-Estas pruebas confirman que Spark no solo está levantado, sino que ejecuta
-jobs reales correctamente.
+Estas pruebas confirman que Spark ejecuta correctamente tareas distribuidas.
 
+---
 
-CASO DE USO IMPLEMENTADO
+## 7. Caso de uso implementado
 
-Como prueba funcional se implementó un caso de uso de procesamiento de imágenes,
-en el que:
+Como prueba funcional se implementó un caso de uso de procesamiento de imágenes:
 
-- Se leyó una imagen en formato JPEG como dato de entrada
-- Se aplicó una transformación (conversión a escala de grises)
-- Se almacenó la imagen resultante como salida
+- Lectura de una imagen en formato JPEG
+- Procesamiento de los datos mediante una transformación a escala de grises
+- Almacenamiento del resultado como fichero de salida
 
-La validación se realizó de forma visual, comprobando que la imagen generada
-corresponde al resultado esperado.
+La validación se realizó de forma visual, comprobando que la imagen generada corresponde al resultado esperado.
 
+---
 
-ASPECTOS APRENDIDOS Y CONSIDERACIONES IMPORTANTES
+## 8. Aspectos aprendidos y consideraciones
 
-Durante el desarrollo se aprendieron y tuvieron en cuenta los siguientes puntos:
+Durante el desarrollo se tuvieron en cuenta los siguientes aspectos:
 
-- No todos los contenedores necesitan exponer puertos al host
-- Los conflictos de puertos son comunes cuando conviven varios servicios
-- Las imágenes Docker oficiales suelen ser mínimas y requieren dependencias adicionales
-- Algunas librerías externas requieren dependencias nativas del sistema
-- Las instalaciones realizadas dentro de un contenedor no son persistentes si se elimina
-- Es importante separar claramente:
-  - Infraestructura
-  - Datos
-  - Código
+- Gestión de puertos para evitar conflictos con otros servicios
+- Uso de volúmenes para la persistencia de datos
+- Instalación de dependencias adicionales dentro del contenedor
+- Diferencias entre ejecutar Spark en modo interactivo y mediante `spark-submit`
+- Importancia de la monitorización mediante la interfaz web
 
-Estos aspectos reflejan problemas reales que aparecen en entornos profesionales.
+Estos puntos reflejan situaciones habituales en entornos reales.
 
+---
 
-CONCLUSIÓN
+## 9. Posibles ampliaciones
 
-Este despliegue demuestra el uso de Apache Spark como motor de procesamiento
-distribuido dentro de un entorno contenerizado, validando tanto su funcionamiento
-técnico como su aplicabilidad a casos reales de procesamiento de datos.
+El sistema puede ampliarse fácilmente para:
+
+- Añadir más Spark Workers
+- Integrar Spark con sistemas de mensajería
+- Procesar múltiples datos en paralelo
+- Automatizar el despliegue completo
+- Crear una imagen Docker personalizada con dependencias incluidas
+
+---
+
+## 10. Conclusión
+
+Apache Spark ha demostrado ser una herramienta eficaz para el procesamiento distribuido de datos dentro de un entorno contenerizado. El despliegue mediante Docker Compose permite validar su funcionamiento de forma sencilla, reproducible y escalable.
