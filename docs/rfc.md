@@ -104,13 +104,4 @@ El RFC 5374 aporta:
 - Fundamento de escalabilidad en sistemas distribuidos.
 - Contexto de redes aplicado a arquitecturas orientadas a eventos.
 
-------------------------------------------------------------------------
-
-## 8. Conclusión
-
-El RFC 5374 no se utiliza directamente en la implementación del
-proyecto, pero proporciona el **marco conceptual** que justifica el
-modelo de comunicación empleado. Comprender este estándar ayuda a
-entender las decisiones de diseño adoptadas y las ventajas del sistema
-frente a modelos tradicionales de comunicación.
 
