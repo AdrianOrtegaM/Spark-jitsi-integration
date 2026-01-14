@@ -1,61 +1,116 @@
-# Introducción: RFC 5374 y comunicación Multicast
+# RFC 5374
 
-En este proyecto es importante entender algunos conceptos básicos de redes que sirven como base teórica para el funcionamiento de sistemas distribuidos modernos. Uno de estos conceptos es la **comunicación multicast**, definida y regulada en documentos oficiales como el **RFC 5374**.
+Documentación teórica sobre el RFC 5374 y el modelo de comunicación
+multicast aplicado a sistemas distribuidos.  
+Este documento sirve como base conceptual para comprender arquitecturas
+uno-a-muchos utilizadas en el proyecto.
 
-El RFC 5374 describe cómo se asignan y organizan las direcciones IP multicast, y aunque este proyecto no utiliza multicast IP de forma directa, el modelo de comunicación que plantea es muy relevante para comprender la arquitectura utilizada.
+------------------------------------------------------------------------
 
----
+## 1. Qué es el RFC 5374
 
-## ¿Qué es el RFC 5374?
+El RFC 5374 es un documento técnico que define el **modelo de asignación
+de direcciones IP multicast**. Su objetivo principal es estandarizar la
+forma en la que se organizan y utilizan las direcciones multicast para
+permitir la comunicación entre un emisor y múltiples receptores.
 
-El RFC 5374 es un documento técnico que define el **modelo de asignación de direcciones IP multicast**. Su objetivo principal es permitir que un emisor pueda enviar información a múltiples receptores de forma eficiente, sin necesidad de duplicar el mensaje para cada uno de ellos.
+Este estándar forma parte de la base teórica de las **arquitecturas
+uno-a-muchos**, ampliamente utilizadas en redes y sistemas distribuidos.
 
-Este estándar forma parte de la base teórica de las **arquitecturas uno-a-muchos**, muy utilizadas en sistemas distribuidos y orientados a eventos.
+------------------------------------------------------------------------
 
----
+## 2. Qué es la comunicación multicast
 
-## Multicast y su pila de red
+La comunicación multicast es un modelo de transmisión en el que un único
+emisor envía información a un grupo de receptores simultáneamente.
 
-La comunicación multicast se apoya en el protocolo **IP (Internet Protocol)** y está disponible tanto en **IPv4** como en **IPv6**.
+A diferencia de otros modelos:
+- Unicast: comunicación uno-a-uno.
+- Broadcast: comunicación uno-a-todos.
+- Multicast: comunicación uno-a-muchos.
+
+Los receptores solo reciben los mensajes si pertenecen al grupo
+multicast correspondiente.
+
+------------------------------------------------------------------------
+
+## 3. Multicast y su pila de red
+
+La comunicación multicast se apoya en el protocolo **IP (Internet
+Protocol)** y está disponible tanto en **IPv4** como en **IPv6**.
 
 ### Multicast en IPv4
-- Utiliza direcciones de **32 bits**
-- Rango multicast:
-  224.0.0.0 – 239.255.255.255
-- Permite agrupar receptores en grupos multicast
+- Direcciones de **32 bits**
+- Rango reservado: 224.0.0.0 – 239.255.255.255
+- Utiliza grupos multicast para la distribución de datos.
 
 ### Multicast en IPv6
-- Utiliza direcciones de **128 bits**
-- Prefijo multicast:
-  FF00::/8
-- Mejora la escalabilidad y el control respecto a IPv4
+- Direcciones de **128 bits**
+- Prefijo multicast:FF00::/8
+- Mejora la escalabilidad y la organización de grupos frente a IPv4.
 
----
+------------------------------------------------------------------------
 
-## ¿Para qué sirve el multicast?
+## 4. Asignación de direcciones multicast
 
-El multicast se utiliza cuando:
-- Un mismo mensaje debe llegar a muchos receptores
-- Se quiere reducir el consumo de red
-- Se necesita escalabilidad
-- Los emisores y receptores están desacoplados
+El RFC 5374 define cómo deben asignarse las direcciones multicast para:
+- Evitar conflictos entre aplicaciones.
+- Permitir una gestión ordenada de los grupos.
+- Facilitar la escalabilidad en redes grandes.
 
-Ejemplos:
-- Streaming
-- Monitorización
-- Distribución de eventos
-- Sistemas distribuidos
+La asignación correcta es fundamental para garantizar un funcionamiento
+eficiente de la comunicación multicast.
 
----
+------------------------------------------------------------------------
 
-## Relación con este proyecto
+## 5. Para qué sirve el multicast
 
-Aunque este proyecto no implementa multicast a nivel de red, el **modelo de comunicación es conceptualmente similar**. En lugar de direcciones multicast, se utilizan mecanismos de alto nivel como productores, canales de distribución y consumidores.
+El multicast se utiliza en escenarios donde:
+- Un mismo mensaje debe llegar a múltiples receptores.
+- Se quiere optimizar el uso del ancho de banda.
+- Se requiere escalabilidad.
+- Los emisores y receptores deben estar desacoplados.
 
-Este enfoque permite que múltiples consumidores reciban la misma información sin que el productor conozca quién la recibe, siguiendo el mismo principio que define el RFC 5374.
+Casos de uso habituales:
+- Streaming de vídeo o audio.
+- Sistemas de monitorización.
+- Distribución de eventos.
+- Sistemas distribuidos.
 
----
+------------------------------------------------------------------------
 
-## Conclusión
+## 6. Relación con este proyecto
 
-El RFC 5374 no se utiliza de forma directa en la implementación, pero proporciona el **marco conceptual** que justifica el uso de arquitecturas orientadas a eventos y sistemas distribuidos.
+Este proyecto no implementa multicast IP de forma directa, pero sí
+aplica el **modelo conceptual definido en el RFC 5374**.
+
+En lugar de direcciones multicast, se utilizan mecanismos de alto nivel
+como:
+- Productores de eventos.
+- Canales o topics de distribución.
+- Consumidores suscritos a dichos eventos.
+
+Este enfoque permite que múltiples consumidores reciban la misma
+información sin que el productor tenga conocimiento directo de ellos,
+siguiendo el principio uno-a-muchos.
+
+------------------------------------------------------------------------
+
+## 7. Importancia del RFC 5374 en el TFG
+
+El RFC 5374 aporta:
+- Base teórica sobre comunicación uno-a-muchos.
+- Justificación del desacoplamiento entre componentes.
+- Fundamento de escalabilidad en sistemas distribuidos.
+- Contexto de redes aplicado a arquitecturas orientadas a eventos.
+
+------------------------------------------------------------------------
+
+## 8. Conclusión
+
+El RFC 5374 no se utiliza directamente en la implementación del
+proyecto, pero proporciona el **marco conceptual** que justifica el
+modelo de comunicación empleado. Comprender este estándar ayuda a
+entender las decisiones de diseño adoptadas y las ventajas del sistema
+frente a modelos tradicionales de comunicación.
+
