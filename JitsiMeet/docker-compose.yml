@@ -3,100 +3,95 @@ services:
     image: jitsi/web:stable
     restart: unless-stopped
     ports:
-      - "8000:80"
-      - "8443:443"
+      - "${HTTP_PORT}:80"
+      - "${HTTPS_PORT}:443"
     volumes:
-      - "/home/ortis/.jitsi-meet-cfg/web:/config:Z"
-      - "/home/ortis/.jitsi-meet-cfg/web/letsencrypt:/etc/letsencrypt:Z"
+      - "${CONFIG}/web:/config:Z"
+      - "${CONFIG}/web/letsencrypt:/etc/letsencrypt:Z"
     environment:
-      - TZ=Europe/Madrid
-      - PUBLIC_URL=https://192.168.1.131:8443
-      - ENABLE_AUTH=0
-      - ENABLE_GUESTS=0
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_MUC_DOMAIN=muc.meet.jitsi
-      - XMPP_GUEST_DOMAIN=guest.meet.jitsi
+      - TZ=${TZ}
+      - PUBLIC_URL=${PUBLIC_URL}
+
+      - ENABLE_AUTH=${ENABLE_AUTH}
+      - ENABLE_GUESTS=${ENABLE_GUESTS}
+      - ENABLE_P2P=${ENABLE_P2P}
+
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
+      - XMPP_GUEST_DOMAIN=${XMPP_GUEST_DOMAIN}
+
       - XMPP_BOSH_URL_BASE=http://prosody:5280
-      - XMPP_WEB_SOCKET_DOMAIN=meet.jitsi
-      - XMPP_WEB_SOCKET_URL=wss://meet.jitsi/xmpp-websocket
-      - ENABLE_TURN_SERVER=1
-      - TURN_CREDENTIALS=static
-      - TURN_HOST=192.168.1.131
-      - TURN_PORT=3478
-      - TURN_SECRET=turnsecret
+      - XMPP_WEB_SOCKET_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_WEB_SOCKET_URL=wss://${XMPP_DOMAIN}/xmpp-websocket
     depends_on:
       - prosody
-      - coturn
 
   prosody:
     image: jitsi/prosody:stable
     restart: unless-stopped
     volumes:
-      - "/home/ortis/.jitsi-meet-cfg/prosody:/config:Z"
+      - "${CONFIG}/prosody:/config:Z"
     environment:
-      - TZ=Europe/Madrid
-      - ENABLE_AUTH=0
-      - ENABLE_GUESTS=0
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_MUC_DOMAIN=muc.meet.jitsi
-      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
-      - XMPP_GUEST_DOMAIN=guest.meet.jitsi
-      - JICOFO_AUTH_USER=focus
-      - JICOFO_AUTH_PASSWORD=focuspass
-      - JVB_AUTH_USER=jvb
-      - JVB_AUTH_PASSWORD=jvbpass
+      - TZ=${TZ}
+
+      - ENABLE_AUTH=${ENABLE_AUTH}
+      - ENABLE_GUESTS=${ENABLE_GUESTS}
+
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
+      - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
+      - XMPP_GUEST_DOMAIN=${XMPP_GUEST_DOMAIN}
+
+      - JICOFO_AUTH_USER=${JICOFO_AUTH_USER}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+
+      - JVB_AUTH_USER=${JVB_AUTH_USER}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
 
   jicofo:
     image: jitsi/jicofo:stable
     restart: unless-stopped
     volumes:
-      - "/home/ortis/.jitsi-meet-cfg/jicofo:/config:Z"
+      - "${CONFIG}/jicofo:/config:Z"
     environment:
-      - TZ=Europe/Madrid
-      - XMPP_DOMAIN=meet.jitsi
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_MUC_DOMAIN=muc.meet.jitsi
-      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
-      - JICOFO_AUTH_USER=focus
-      - JICOFO_AUTH_PASSWORD=focuspass
+      - TZ=${TZ}
+      - XMPP_SERVER=prosody
+      - XMPP_PORT=5222
+
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
+      - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
+
+      - JICOFO_AUTH_USER=${JICOFO_AUTH_USER}
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
     depends_on:
       - prosody
 
   jvb:
     image: jitsi/jvb:stable
     restart: unless-stopped
-    network_mode: host
+    #NO host network: así SÍ resuelve "prosody"
+    ports:
+      - "10000:10000/udp"
     volumes:
-      - "/home/ortis/.jitsi-meet-cfg/jvb:/config:Z"
+      - "${CONFIG}/jvb:/config:Z"
     environment:
-      - TZ=Europe/Madrid
-      - XMPP_AUTH_DOMAIN=auth.meet.jitsi
-      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi
-      - JVB_AUTH_USER=jvb
-      - JVB_AUTH_PASSWORD=jvbpass
-      - JVB_ADVERTISE_IPS=192.168.1.131
-      - JVB_UDP_HARVESTER_DISABLED=false
-      - JVB_TCP_HARVESTER_DISABLED=true
-      - JVB_STUN_SERVERS=
+      - TZ=${TZ}
+      - XMPP_SERVER=prosody
+      - XMPP_PORT=5222
+
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
+
+      - JVB_AUTH_USER=${JVB_AUTH_USER}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+
+      - JVB_ADVERTISE_IPS=${JVB_ADVERTISE_IPS}
+      - JVB_UDP_HARVESTER_DISABLED=${JVB_UDP_HARVESTER_DISABLED}
+      - JVB_TCP_HARVESTER_DISABLED=${JVB_TCP_HARVESTER_DISABLED}
+      - JVB_STUN_SERVERS=${JVB_STUN_SERVERS}
     depends_on:
       - prosody
-
-  coturn:
-    image: coturn/coturn:latest
-    restart: unless-stopped
-    network_mode: host
-    command: >
-      turnserver
-      --no-cli
-      --no-tls
-      --no-dtls
-      --no-tcp-relay
-      --min-port=49160
-      --max-port=49200
-      --realm=turn.local
-      --use-auth-secret
-      --static-auth-secret=turnsecret
-      --listening-ip=0.0.0.0
-      --external-ip=192.168.1.131
