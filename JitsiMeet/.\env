@@ -1,0 +1,66 @@
+# =========================
+# Zona horaria
+# =========================
+TZ=Europe/Madrid
+
+# =========================
+# Carpeta de configuración
+# =========================
+CONFIG=/home/ortis/.jitsi-meet-cfg
+
+# =========================
+# Puertos
+# =========================
+HTTP_PORT=8000
+HTTPS_PORT=8443
+
+# =========================
+# URL pública (IP para PC + móvil)
+# =========================
+PUBLIC_URL=https://192.168.1.131:8443
+
+# =========================
+# Auth
+# =========================
+ENABLE_AUTH=0
+ENABLE_GUESTS=1
+
+# =========================
+# DESACTIVAR P2P (CRÍTICO)
+# =========================
+ENABLE_P2P=0
+
+# =========================
+# Dominios XMPP (internos)
+# =========================
+XMPP_DOMAIN=jitsi.local
+XMPP_AUTH_DOMAIN=auth.jitsi.local
+XMPP_MUC_DOMAIN=muc.jitsi.local
+XMPP_INTERNAL_MUC_DOMAIN=internal-muc.jitsi.local
+XMPP_GUEST_DOMAIN=guest.jitsi.local
+
+# =========================
+# Usuarios internos
+# =========================
+JICOFO_AUTH_USER=focus
+JICOFO_AUTH_PASSWORD=focuspass123
+
+JVB_AUTH_USER=jvb
+JVB_AUTH_PASSWORD=jvbpass123
+
+# =========================
+# JVB (LAN → UDP)
+# =========================
+JVB_ADVERTISE_IPS=192.168.1.131
+JVB_UDP_HARVESTER_DISABLED=false
+JVB_TCP_HARVESTER_DISABLED=true
+JVB_STUN_SERVERS=
+
+# =========================
+# TURN (no crítico en LAN)
+# =========================
+ENABLE_TURN_SERVER=0
+TURN_HOST=192.168.1.131
+TURN_PORT=3478
+TURN_SECRET=turnsecret
+TURN_CREDENTIALS=static
