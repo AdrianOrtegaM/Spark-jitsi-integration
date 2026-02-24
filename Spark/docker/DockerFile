@@ -1,0 +1,12 @@
+FROM apache/spark:3.5.0
+
+USER root
+
+RUN mkdir -p /var/lib/apt/lists/partial \
+ && apt-get update \
+ && apt-get install -y python3-pip \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir opencv-python-headless numpy
+
+USER spark
