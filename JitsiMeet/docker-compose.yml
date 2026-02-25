@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+
   web:
     image: jitsi/web:stable
     restart: unless-stopped
@@ -11,21 +14,21 @@ services:
     environment:
       - TZ=${TZ}
       - PUBLIC_URL=${PUBLIC_URL}
-
       - ENABLE_AUTH=${ENABLE_AUTH}
       - ENABLE_GUESTS=${ENABLE_GUESTS}
       - ENABLE_P2P=${ENABLE_P2P}
-
+      - ENABLE_RECORDING=${ENABLE_RECORDING}
+      - ENABLE_PREJOIN_PAGE=${ENABLE_PREJOIN_PAGE}
       - XMPP_DOMAIN=${XMPP_DOMAIN}
       - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
       - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
       - XMPP_GUEST_DOMAIN=${XMPP_GUEST_DOMAIN}
-
       - XMPP_BOSH_URL_BASE=http://prosody:5280
       - XMPP_WEB_SOCKET_DOMAIN=${XMPP_DOMAIN}
       - XMPP_WEB_SOCKET_URL=wss://${XMPP_DOMAIN}/xmpp-websocket
     depends_on:
       - prosody
+
 
   prosody:
     image: jitsi/prosody:stable
@@ -34,21 +37,24 @@ services:
       - "${CONFIG}/prosody:/config:Z"
     environment:
       - TZ=${TZ}
-
       - ENABLE_AUTH=${ENABLE_AUTH}
       - ENABLE_GUESTS=${ENABLE_GUESTS}
-
+      - ENABLE_RECORDING=${ENABLE_RECORDING}
+      - JIBRI_RECORDER_USER=${JIBRI_RECORDER_USER}
+      - JIBRI_RECORDER_PASSWORD=${JIBRI_RECORDER_PASSWORD}
+      - JIBRI_XMPP_USER=${JIBRI_XMPP_USER}
+      - JIBRI_XMPP_PASSWORD=${JIBRI_XMPP_PASSWORD}
+      - JIBRI_BREWERY_MUC=${JIBRI_BREWERY_MUC}
       - XMPP_DOMAIN=${XMPP_DOMAIN}
       - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
       - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
       - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
       - XMPP_GUEST_DOMAIN=${XMPP_GUEST_DOMAIN}
-
       - JICOFO_AUTH_USER=${JICOFO_AUTH_USER}
       - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
-
       - JVB_AUTH_USER=${JVB_AUTH_USER}
       - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
+
 
   jicofo:
     image: jitsi/jicofo:stable
@@ -57,23 +63,24 @@ services:
       - "${CONFIG}/jicofo:/config:Z"
     environment:
       - TZ=${TZ}
+      - ENABLE_RECORDING=${ENABLE_RECORDING}
       - XMPP_SERVER=prosody
       - XMPP_PORT=5222
-
       - XMPP_DOMAIN=${XMPP_DOMAIN}
       - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
       - XMPP_MUC_DOMAIN=${XMPP_MUC_DOMAIN}
       - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
-
       - JICOFO_AUTH_USER=${JICOFO_AUTH_USER}
       - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD}
+      - JIBRI_BREWERY_MUC=${JIBRI_BREWERY_MUC}
+      - JIBRI_BREWERY_JID=${JIBRI_BREWERY_JID}
     depends_on:
       - prosody
+
 
   jvb:
     image: jitsi/jvb:stable
     restart: unless-stopped
-    #NO host network: así SÍ resuelve "prosody"
     ports:
       - "10000:10000/udp"
     volumes:
@@ -82,16 +89,51 @@ services:
       - TZ=${TZ}
       - XMPP_SERVER=prosody
       - XMPP_PORT=5222
-
       - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
       - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
-
       - JVB_AUTH_USER=${JVB_AUTH_USER}
       - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD}
-
       - JVB_ADVERTISE_IPS=${JVB_ADVERTISE_IPS}
       - JVB_UDP_HARVESTER_DISABLED=${JVB_UDP_HARVESTER_DISABLED}
       - JVB_TCP_HARVESTER_DISABLED=${JVB_TCP_HARVESTER_DISABLED}
       - JVB_STUN_SERVERS=${JVB_STUN_SERVERS}
     depends_on:
       - prosody
+
+
+  jibri:
+    image: jitsi/jibri:stable
+    restart: unless-stopped
+    privileged: true
+
+    # CLAVE: jitsi.local ahora apunta al contenedor web (no al host)
+    links:
+      - web:jitsi.local
+
+    volumes:
+      - "${CONFIG}/jibri:/config:Z"
+      - "/dev/shm:/dev/shm"
+    devices:
+      - "/dev/snd:/dev/snd"
+    cap_add:
+      - SYS_ADMIN
+      - NET_ADMIN
+    environment:
+      - TZ=${TZ}
+      - DISPLAY=:0
+      - CHROMIUM_FLAGS=${CHROMIUM_FLAGS}
+      - JIBRI_RECORDING_DIR=/config/recordings
+      - JIBRI_FINALIZE_RECORDING_SCRIPT_PATH=/config/finalize.sh
+      - XMPP_SERVER=prosody
+      - XMPP_DOMAIN=${XMPP_DOMAIN}
+      - XMPP_AUTH_DOMAIN=${XMPP_AUTH_DOMAIN}
+      - XMPP_INTERNAL_MUC_DOMAIN=${XMPP_INTERNAL_MUC_DOMAIN}
+      - JIBRI_RECORDER_USER=${JIBRI_RECORDER_USER}
+      - JIBRI_RECORDER_PASSWORD=${JIBRI_RECORDER_PASSWORD}
+      - JIBRI_XMPP_USER=${JIBRI_XMPP_USER}
+      - JIBRI_XMPP_PASSWORD=${JIBRI_XMPP_PASSWORD}
+      - JIBRI_BREWERY_MUC=${JIBRI_BREWERY_MUC}
+    depends_on:
+      - prosody
+      - jicofo
+      - jvb
