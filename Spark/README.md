@@ -1,134 +1,199 @@
-# Apache Spark – Procesamiento de datos con Docker
+````md id="v8gk31"
+# Spark Streaming - JitsiToSpark
 
-## 1. Introducción
+Módulo de procesamiento distribuido en tiempo real desarrollado para el proyecto TFG **JitsiToSpark**.
 
-Apache Spark es un motor de procesamiento distribuido diseñado para el análisis y transformación de grandes volúmenes de datos de forma eficiente.
-
-En este proyecto se utiliza Apache Spark como sistema de procesamiento de datos, desplegado en modo standalone mediante Docker Compose. El objetivo es ejecutar jobs distribuidos y validar el procesamiento de datos reales dentro de un entorno controlado y reproducible.
-
----
-
-## 2. Arquitectura del sistema
-
-El sistema se compone de los siguientes elementos:
-
-- **Spark Master**
-  - Coordina el clúster
-  - Asigna recursos a los workers
-  - Proporciona una interfaz web de monitorización
-
-- **Spark Worker**
-  - Ejecuta las tareas distribuidas
-  - Consume los recursos asignados por el Master
-
-- **Red Docker dedicada**
-  - Permite la comunicación interna entre los servicios
-
-- **Volúmenes compartidos**
-  - Permiten persistir los datos de entrada y salida fuera de los contenedores
-
-Esta arquitectura permite escalar el sistema fácilmente añadiendo nuevos workers.
+Este sistema consume frames multimedia desde Apache Kafka y aplica diferentes transformaciones de procesamiento de imagen utilizando Apache Spark Streaming y OpenCV.
 
 ---
 
-## 3. Despliegue con Docker Compose
+# Arquitectura
 
-El despliegue de Apache Spark se realiza mediante Docker Compose, utilizando una arquitectura standalone con un nodo master y un worker.
+El flujo multimedia utilizado sigue la siguiente estructura:
 
-Los contenedores se ejecutan de forma aislada y se comunican a través de una red bridge definida específicamente para el clúster.
+Jitsi Meet → RTMP → MediaMTX → Kafka → Spark Streaming → OpenCV
 
 ---
 
-## 4. Estructura del proyecto
+# Tecnologías utilizadas
 
-```
+- Apache Spark Streaming
+- Apache Kafka
+- OpenCV
+- Python
+- Docker
+
+---
+
+# Estructura del proyecto
+
+```text
 spark/
+│
 ├── docker-compose.yml
+├── Dockerfile
+│
+├── spark_kafka_frames.py
+├── spark_frames_to_gray.py
+├── spark_kafka_brillo_contraste.py
+├── spark_kafka_histograma.py
+├── spark_kafka_clahe.py
+│
+├── tests/
+│   └── read_kafka_frames.py
+│
 ├── images/
-│   ├── input/
-│   │   └── animal.jpeg
-│   └── output/
-│       └── animal_gray.jpeg
-```
-
-- `images/input/` contiene los datos de entrada
-- `images/output/` almacena los resultados generados por Spark
+│   └── .gitkeep
+│
+├── requirements.txt
+├── .gitignore
+└── README.md
+````
 
 ---
 
-## 5. Puesta en marcha
+# Descripción de scripts
 
-Arranque del clúster:
+| Script                          | Función                                   |
+| ------------------------------- | ----------------------------------------- |
+| spark_kafka_frames.py           | Procesamiento principal de frames         |
+| spark_frames_to_gray.py         | Conversión de imágenes a escala de grises |
+| spark_kafka_brillo_contraste.py | Ajuste de brillo y contraste              |
+| spark_kafka_histograma.py       | Ecualización y normalización              |
+| spark_kafka_clahe.py            | Mejora de contraste mediante CLAHE        |
+| read_kafka_frames.py            | Lectura de mensajes Kafka para pruebas    |
 
-```
+---
+
+# Requisitos
+
+Es necesario tener instalado:
+
+* Docker
+* Docker Compose
+* Python 3
+* Apache Spark
+* Apache Kafka
+
+---
+
+# Inicio del sistema
+
+Para iniciar Spark Streaming:
+
+```bash
 docker compose up -d
 ```
 
-Comprobación del estado de los contenedores:
+Para comprobar los contenedores activos:
 
-```
+```bash
 docker ps
 ```
 
-Acceso a la interfaz web del Spark Master:
+---
 
+# Kafka
+
+El sistema consume frames desde el tópico:
+
+```text
+raw-frames
 ```
-http://localhost:9090
+
+y utiliza el broker:
+
+```text
+kafka:29092
 ```
 
 ---
 
-## 6. Validación del funcionamiento
+# Procesamiento de imágenes
 
-El correcto funcionamiento del clúster se validó mediante:
+El sistema permite aplicar diferentes transformaciones multimedia en tiempo real:
 
-- Visualización del worker activo en la interfaz web
-- Ejecución de aplicaciones distribuidas mediante `spark-submit`
-- Monitorización de aplicaciones en estado RUNNING y COMPLETED
-- Consumo de recursos por parte del worker durante la ejecución de jobs
+* Escala de grises
+* Brillo y contraste
+* Ecualización de histograma
+* CLAHE
 
-Estas pruebas confirman que Spark ejecuta correctamente tareas distribuidas.
+Las imágenes procesadas se almacenan automáticamente dentro de la carpeta:
 
----
-
-## 7. Caso de uso implementado
-
-Como prueba funcional se implementó un caso de uso de procesamiento de imágenes:
-
-- Lectura de una imagen en formato JPEG
-- Procesamiento de los datos mediante una transformación a escala de grises
-- Almacenamiento del resultado como fichero de salida
-
-La validación se realizó de forma visual, comprobando que la imagen generada corresponde al resultado esperado.
+```text
+/images/
+```
 
 ---
 
-## 8. Aspectos aprendidos y consideraciones
+# Sesiones automáticas
 
-Durante el desarrollo se tuvieron en cuenta los siguientes aspectos:
+El sistema genera automáticamente carpetas independientes para cada ejecución:
 
-- Gestión de puertos para evitar conflictos con otros servicios
-- Uso de volúmenes para la persistencia de datos
-- Instalación de dependencias adicionales dentro del contenedor
-- Diferencias entre ejecutar Spark en modo interactivo y mediante `spark-submit`
-- Importancia de la monitorización mediante la interfaz web
+```text
+sesion_1
+sesion_2
+sesion_3
+```
 
-Estos puntos reflejan situaciones habituales en entornos reales.
-
----
-
-## 9. Posibles ampliaciones
-
-El sistema puede ampliarse fácilmente para:
-
-- Añadir más Spark Workers
-- Integrar Spark con sistemas de mensajería
-- Procesar múltiples datos en paralelo
-- Automatizar el despliegue completo
-- Crear una imagen Docker personalizada con dependencias incluidas
+permitiendo separar los resultados obtenidos durante diferentes pruebas.
 
 ---
 
-## 10. Conclusión
+# Checkpoints
 
-Apache Spark ha demostrado ser una herramienta eficaz para el procesamiento distribuido de datos dentro de un entorno contenerizado. El despliegue mediante Docker Compose permite validar su funcionamiento de forma sencilla, reproducible y escalable.
+Spark Streaming utiliza carpetas de checkpoint para:
+
+* Control de batches
+* Recuperación de estado
+* Gestión de offsets Kafka
+
+Estas carpetas se generan automáticamente durante la ejecución.
+
+---
+
+# Ejecución manual
+
+Ejemplo de ejecución:
+
+```bash
+python spark_kafka_frames.py
+```
+
+o:
+
+```bash
+spark-submit spark_kafka_frames.py
+```
+
+---
+
+# Problemas encontrados durante el desarrollo
+
+Durante el desarrollo aparecieron diferentes problemas relacionados con:
+
+* Configuración de Kafka
+* Permisos Docker
+* Compatibilidad entre versiones
+* Procesamiento distribuido
+* Gestión de directorios
+* Streaming multimedia en tiempo real
+
+La solución aplicada consistió en ajustar la configuración de Spark, Kafka y Docker hasta conseguir una arquitectura estable para el procesamiento multimedia distribuido.
+
+---
+
+# Carpetas no incluidas en GitHub
+
+Las siguientes carpetas se generan automáticamente y no se incluyen en el repositorio:
+
+```text
+images/
+output_*/
+checkpoint_*/
+ivy/
+.venv/
+```
+
+---
+
