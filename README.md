@@ -21,7 +21,7 @@ El objetivo principal del proyecto es desarrollar una arquitectura modular capaz
 
 El flujo multimedia implementado sigue la siguiente estructura:
 
-```text
+
 Jitsi Meet
     ↓
 RTMP (MediaMTX)
