@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  spark-master:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: spark-opencv:3.5.0
+    container_name: spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_BIND_ADDRESS=0.0.0.0
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+    volumes:
+      - ./images:/images
+      - ./jobs:/jobs
+      - ./ivy:/home/spark/.ivy2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - bigdata-net
+
+  spark-worker:
+    image: spark-opencv:3.5.0
+    container_name: spark-worker
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_WORKER_HOST=spark-worker
+      - SPARK_WORKER_BIND_ADDRESS=0.0.0.0
+    volumes:
+      - ./images:/images
+      - ./jobs:/jobs
+      - ./ivy:/home/spark/.ivy2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - bigdata-net
+
+  spark-stream:
+    image: spark-opencv:3.5.0
+    container_name: spark-stream
+    depends_on:
+      - spark-master
+      - spark-worker
+    command: >
+      /bin/bash -c "
+      mkdir -p /home/spark/.ivy2/cache /home/spark/.ivy2/jars &&
+      sleep 10 &&
+      /opt/spark/bin/spark-submit
+      --master spark://spark-master:7077
+      --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
+      /jobs/spark_kafka_frames.py
+      "
+    volumes:
+      - ./images:/images
+      - ./jobs:/jobs
+      - ./ivy:/home/spark/.ivy2
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - bigdata-net
+
+networks:
+  bigdata-net:
+    external: true
