@@ -1,1 +1,23 @@
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: mediamtx
+    ports:
+      - "1935:1935"
+      - "9997:9997"
+    networks:
+      - bigdata-net
+    restart: unless-stopped
 
+  frame-extractor:
+    build: ./frame-extractor
+    container_name: frame-extractor
+    depends_on:
+      - mediamtx
+    networks:
+      - bigdata-net
+    restart: unless-stopped
+
+networks:
+  bigdata-net:
+    external: true
