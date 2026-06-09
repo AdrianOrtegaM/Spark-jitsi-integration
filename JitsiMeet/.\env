@@ -1,80 +1,60 @@
-# =========================
-# Zona horaria
-# =========================
+# --- Básico ---
 TZ=Europe/Madrid
-
-# =========================
-# Carpeta de configuración
-# =========================
 CONFIG=/home/ortis/.jitsi-meet-cfg
 
-# =========================
-# Puertos
-# =========================
 HTTP_PORT=8000
-HTTPS_PORT=8443
+HTTPS_PORT=443
+PUBLIC_URL=https://192.168.1.131
 
-# =========================
-# URL pública (USAMOS IP)
-# =========================
-PUBLIC_URL=https://192.168.1.131:8443/
+# CLAVE
+DOCKER_HOST_ADDRESS=192.168.1.131
 
-# =========================
-# Auth
-# =========================
+# --- Acceso invitado ---
 ENABLE_AUTH=0
 ENABLE_GUESTS=1
-
-# =========================
-# DESACTIVAR P2P (CRÍTICO)
-# =========================
 ENABLE_P2P=0
+ENABLE_PREJOIN_PAGE=0
+ENABLE_HTTP_REDIRECT=0
 
-# =========================
-# Dominios XMPP internos
-# =========================
+# --- XMPP ---
 XMPP_DOMAIN=jitsi.local
 XMPP_AUTH_DOMAIN=auth.jitsi.local
 XMPP_MUC_DOMAIN=muc.jitsi.local
 XMPP_INTERNAL_MUC_DOMAIN=internal-muc.jitsi.local
 XMPP_GUEST_DOMAIN=guest.jitsi.local
 
-# =========================
-# Usuarios internos
-# =========================
+# --- Websocket cliente ---
+XMPP_WEB_SOCKET_DOMAIN=192.168.1.131
+XMPP_WEB_SOCKET_URL=wss://192.168.1.131/xmpp-websocket
+
+# --- Usuarios internos ---
 JICOFO_AUTH_USER=focus
 JICOFO_AUTH_PASSWORD=focuspass123
-
 JVB_AUTH_USER=jvb
 JVB_AUTH_PASSWORD=jvbpass123
 
-# =========================
-# JVB LAN
-# =========================
+# --- JVB ---
 JVB_ADVERTISE_IPS=192.168.1.131
 JVB_UDP_HARVESTER_DISABLED=false
 JVB_TCP_HARVESTER_DISABLED=true
 JVB_STUN_SERVERS=
 
-# =========================
-# TURN (no necesario en LAN)
-# =========================
-ENABLE_TURN_SERVER=0
+# importante para bridge websocket
+ENABLE_COLIBRI_WEBSOCKET=1
 
-# =========================
-# Recording / Jibri
-# =========================
+# --- Recording / Jibri ---
 ENABLE_RECORDING=1
+ENABLE_LIVESTREAMING=1
 
 JIBRI_RECORDER_USER=recorder
 JIBRI_RECORDER_PASSWORD=recorderpass123
-
 JIBRI_XMPP_USER=jibri
 JIBRI_XMPP_PASSWORD=jibripass123
-
 JIBRI_BREWERY_MUC=jibribrewery
 JIBRI_BREWERY_JID=jibribrewery@internal-muc.jitsi.local
+CHROMIUM_FLAGS=--ignore-certificate-errors,--allow-insecure-localhost,--kiosk,--start-fullscreen,--hide-scrollbars,--disable-infobars
+#---No Pantalla Completa CHROMIUM_FLAGS=--ignore-certificate-errors,--allow-insecure-localhost---
 
-# Chrome flags para ignorar certificado self-signed
-CHROMIUM_FLAGS=--ignore-certificate-errors --allow-insecure-localhost
-ENABLE_PREJOIN_PAGE=0
+
+# --- Versión ---
+JITSI_IMAGE_VERSION=stable-9909
