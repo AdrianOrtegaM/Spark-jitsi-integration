@@ -192,6 +192,10 @@ ivy/
 *.mp4
 *.jpg
 ```
+# Licencia
 
+Este proyecto ha sido desarrollado con fines académicos como parte del Trabajo de Fin de Grado del Grado en Ingeniería Informática de la Universidad de Burgos.
+
+El código fuente se proporciona únicamente con fines educativos y de consulta.
 ---
 
